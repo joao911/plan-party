@@ -16,7 +16,7 @@ export const Login: React.FC = () => {
   const {
     handleSubmit,
     control,
-    watch,
+
     formState: { errors },
   } = useForm<NewCycleFormData>({
     resolver: zodResolver(userSchema),
