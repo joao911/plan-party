@@ -45,7 +45,7 @@ export const Register: React.FC = () => {
   };
 
   return (
-    <Card className="p-2 w-[25rem]">
+    <Card className="p-2 w-[25rem] border-none">
       <Link to="/">
         <p className="mb-4">eu sou o Logo seus viado</p>
       </Link>

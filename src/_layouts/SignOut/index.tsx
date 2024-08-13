@@ -5,7 +5,7 @@ import { Outlet } from "react-router-dom";
 
 export const SignOut: React.FC = () => {
   return (
-    <div className="flex justify-center items-center flex-col  md:bg-[url('/planbg.jpeg')] bg-no-repeat bg-cover md:min-h-screen overflow-auto">
+    <div className="flex justify-center items-center flex-col  md:bg-[url('/planbg.jpeg')] bg-no-repeat bg-cover min-h-screen overflow-auto">
       <Outlet />
     </div>
   );
