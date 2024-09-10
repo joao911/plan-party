@@ -4,9 +4,15 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Link } from "react-router-dom";
+import { Switch } from "antd";
+import { useSetApi } from "../../../setApi";
+import { useMutation } from "@tanstack/react-query";
+import { loginFelipe, loginVito } from "./useLogin";
 
 export const Login: React.FC = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const { api, setApi } = useSetApi();
+
   const userSchema = z.object({
     email: z.string().min(1, "Email é obrigatório").email("Email inválido"),
     password: z.string().min(1, "Senha é obrigatória"),
@@ -22,8 +28,45 @@ export const Login: React.FC = () => {
     resolver: zodResolver(userSchema),
   });
 
+  const onChange = (checked: boolean) => {
+    setApi(checked);
+  };
+
+  const { mutateAsync: loginVitoFn } = useMutation({
+    mutationFn: loginVito,
+  });
+
+  const { mutateAsync: loginFelipeFn } = useMutation({
+    mutationFn: loginFelipe,
+  });
+
+  async function handleLoginVito(login: string, password: string) {
+    try {
+      await loginVitoFn({
+        contact: login,
+        password,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function handleLoginFelipe(email: string, password: string) {
+    try {
+      await loginFelipeFn({
+        email,
+        password,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   const onSubmit = async (data: NewCycleFormData) => {
-    console.log("data", data);
+    const { email, password } = data;
+    api
+      ? await handleLoginVito(email, password)
+      : await handleLoginFelipe(email, password);
   };
 
   return (
@@ -76,10 +119,15 @@ export const Login: React.FC = () => {
             </div>
           )}
         />
+
         <Button className="w-full text-white bg-button-color" htmlType="submit">
           Entrar
         </Button>
       </form>
+      <div className="flex gap-2 mt-2">
+        <Switch defaultChecked onChange={onChange} value={api} />
+        <p>Usar Api {api ? "Victor" : "Felipe"}</p>
+      </div>
       <div className="flex justify-between mt-2">
         <Link to="/forgot-password">
           <p className="cursor-pointer text-button-color">

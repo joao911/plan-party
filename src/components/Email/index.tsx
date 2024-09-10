@@ -1,12 +1,18 @@
-import React from "react";
+import React, { useState } from "react";
 import { Input, Button } from "antd";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useMutation } from "@tanstack/react-query";
+import { sendCodeFelipe, sendCodeVito } from "./useEmail";
+import { useSetApi } from "../../setApi";
 interface EmailProps {
   setStepNumber(step: number): void;
+  setEmail(email: string): void;
 }
-export const Email: React.FC<EmailProps> = ({ setStepNumber }) => {
+export const Email: React.FC<EmailProps> = ({ setStepNumber, setEmail }) => {
+  const { api } = useSetApi();
+
   const userSchema = z.object({
     email: z.string().min(1, "Email é obrigatório").email("Email inválido"),
   });
@@ -20,9 +26,42 @@ export const Email: React.FC<EmailProps> = ({ setStepNumber }) => {
     resolver: zodResolver(userSchema),
   });
 
+  const { mutateAsync: sendCodeVitoFn } = useMutation({
+    mutationFn: sendCodeVito,
+  });
+
+  const { mutateAsync: sendCodeFelipeFn } = useMutation({
+    mutationFn: sendCodeFelipe,
+  });
+
+  async function handleSendCodeVito(email: string) {
+    try {
+      setStepNumber(1);
+      await sendCodeVitoFn({
+        email,
+        phone: "",
+        whatsApp: "",
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function handleSendCodeFelipe(email: string) {
+    try {
+      setStepNumber(1);
+      await sendCodeFelipeFn({
+        email,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   const onSubmit = async (data: NewCycleFormData) => {
-    console.log("data", data);
-    setStepNumber(1);
+    const { email } = data;
+    setEmail(email);
+    api ? await handleSendCodeVito(email) : await handleSendCodeFelipe(email);
   };
   return (
     <>

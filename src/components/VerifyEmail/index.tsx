@@ -1,11 +1,55 @@
 import React from "react";
 import { Button } from "antd";
+import { useMutation } from "@tanstack/react-query";
+import { sendCodeFelipe, sendCodeVito } from "../Email/useEmail";
+import { useSetApi } from "../../setApi";
 
 interface VerifyEmailProps {
   setStepNumber(step: number): void;
+  email: string;
 }
 
-export const VerifyEmail: React.FC<VerifyEmailProps> = ({ setStepNumber }) => {
+export const VerifyEmail: React.FC<VerifyEmailProps> = ({
+  setStepNumber,
+  email,
+}) => {
+  const { api } = useSetApi();
+
+  const { mutateAsync: sendCodeVitoFn } = useMutation({
+    mutationFn: sendCodeVito,
+  });
+
+  const { mutateAsync: sendCodeFelipeFn } = useMutation({
+    mutationFn: sendCodeFelipe,
+  });
+
+  async function handleSendCodeVito(email: string) {
+    try {
+      await sendCodeVitoFn({
+        email,
+        phone: "",
+        whatsApp: "",
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function handleSendCodeFelipe(email: string) {
+    try {
+      setStepNumber(1);
+      await sendCodeFelipeFn({
+        email,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  function handleResendCode() {
+    api ? handleSendCodeVito(email) : handleSendCodeFelipe(email);
+  }
+
   return (
     <>
       <h1 className="text-xl font-bold">Verifique seu e-mail </h1>
@@ -18,10 +62,13 @@ export const VerifyEmail: React.FC<VerifyEmailProps> = ({ setStepNumber }) => {
         htmlType="submit"
         onClick={() => setStepNumber(2)}
       >
-        Enviar
+        Ok
       </Button>
       <div className="flex justify-between mt-4">
-        <p>Não receber o Código?</p> <p className="cursor-pointer">Reenviar</p>
+        <p>Não receber o Código?</p>{" "}
+        <button onClick={handleResendCode} className="cursor-pointer">
+          Reenviar
+        </button>
       </div>
     </>
   );

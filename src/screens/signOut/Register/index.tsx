@@ -5,11 +5,15 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Link } from "react-router-dom";
+import { useMutation } from "@tanstack/react-query";
+import { registerFelipe, registerVito } from "./useRegister";
+import { useSetApi } from "../../../setApi";
 // import { Container } from './styles';
 
 export const Register: React.FC = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+  const { api } = useSetApi();
 
   const passwordSchema = z
     .string()
@@ -22,7 +26,7 @@ export const Register: React.FC = () => {
   const userSchema = z
     .object({
       nome: z.string().min(1, "Nome é obrigatório"),
-      email: z.string().min(1, "Email é obrigatório").email("Email inválido"),
+      email: z.string().min(1, "Email é obrigatório"),
       password: passwordSchema,
       confirm_password: passwordSchema,
     })
@@ -35,13 +39,55 @@ export const Register: React.FC = () => {
   const {
     handleSubmit,
     control,
-
     formState: { errors },
   } = useForm<NewCycleFormData>({
     resolver: zodResolver(userSchema),
   });
+
+  const { mutateAsync: registerVitoFn } = useMutation({
+    mutationFn: registerVito,
+  });
+
+  const { mutateAsync: registerFelipeFn } = useMutation({
+    mutationFn: registerFelipe,
+  });
+
+  async function handleRegisterVito(
+    contact: string,
+    password: string,
+    confirmPassword: string
+  ) {
+    try {
+      await registerVitoFn({
+        contact,
+        password,
+        confirmPassword,
+        recoveryOptions: ["whatsApp"],
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  async function handleRegisterFelipe(
+    name: string,
+    email: string,
+    password: string
+  ) {
+    try {
+      await registerFelipeFn({
+        name,
+        email,
+        password,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
   const onSubmit = async (data: NewCycleFormData) => {
-    console.log("data", data);
+    const { email, password, nome } = data;
+    api
+      ? await handleRegisterVito(email, password, password)
+      : await handleRegisterFelipe(nome, email, password);
   };
 
   return (
@@ -56,7 +102,7 @@ export const Register: React.FC = () => {
           defaultValue=""
           render={({ field }) => (
             <div className="w-full h-[5rem]">
-              <label htmlFor="name">Email</label>
+              <label htmlFor="name">Nome</label>
               <Input
                 id="name"
                 {...field}
@@ -94,7 +140,7 @@ export const Register: React.FC = () => {
           defaultValue=""
           render={({ field }) => (
             <div className="w-full h-[5rem]">
-              <label htmlFor="email">Email</label>
+              <label htmlFor="email">Senha</label>
               <Input.Password
                 id="password"
                 {...field}

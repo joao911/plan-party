@@ -10,16 +10,17 @@ import { NewPassword } from "../../../components/NewPassword";
 
 export const ForgotPassword: React.FC = () => {
   const [stepNumber, setStepNumber] = useState(0);
+  const [email, setEmail] = useState("");
   function renderStep() {
     switch (stepNumber) {
       case 0:
-        return <Email setStepNumber={setStepNumber} />;
+        return <Email setStepNumber={setStepNumber} setEmail={setEmail} />;
       case 1:
-        return <VerifyEmail setStepNumber={setStepNumber} />;
+        return <VerifyEmail setStepNumber={setStepNumber} email={email} />;
       case 2:
         return <NewPassword />;
       default:
-        return <Email setStepNumber={setStepNumber} />;
+        return <Email setStepNumber={setStepNumber} setEmail={setEmail} />;
     }
   }
   return (
